@@ -10,8 +10,8 @@ def restart_db():
     db.create_all()
 
     author = Agent(name='Stephen Zweibel', birth_date=datetime.strptime('1985', '%Y'), aliases=[Alias(name='Laurence'), Alias(name='Fred')])
-    an_author = Agent(name='Joe Wilner', birth_date=datetime.strptime('1986', '%Y'), aliases=[Alias(name='Willie'), Alias(name='Potato')])
-    a_work = Work(title='My Autobiography', agents=[author, an_author])
+    another_author = Agent(name='Joe Wilner', birth_date=datetime.strptime('1986', '%Y'), aliases=[Alias(name='Willie'), Alias(name='Potato')])
+    a_work = Work(title='My Autobiography', agents=[author, another_author])
 
     db.session.add(a_work)
 
