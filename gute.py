@@ -1,9 +1,11 @@
 from flask import Flask, request, redirect, url_for, render_template, flash, make_response, jsonify, send_file
 from flask.ext.sqlalchemy import SQLAlchemy
-import flask.ext.restless
+# import flask.ext.restless
 
 # create application
 app = Flask('gute')
+
+app.config.from_pyfile('settings.cfg')
 
 # connect to database
 db = SQLAlchemy(app)
@@ -24,10 +26,10 @@ headings = db.Table('headings',
     db.Column('work_id', db.Integer, db.ForeignKey('work.id'))
 )
 
-tokens = db.Table('headings',
+tokens = db.Table('tokens',
     db.Column('token_id', db.Integer, db.ForeignKey('token.id'), primary_key=True),
     db.Column('work_id', db.Integer, db.ForeignKey('work.id'), primary_key=True),
-    db.Column('position', db.Integer, primary_key=True)
+    db.Column('position', db.Integer)
 )
 
 class Work(db.Model):
@@ -59,7 +61,7 @@ class Agent(db.Model):
 class Alias(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
-    agent_id = db.Column(db.Integer, db.ForeignKey('Agent.id'))
+    agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'))
 
     def __repr__(self):
         return '<Alias %r>' % self.name
@@ -79,12 +81,10 @@ class Token(db.Model):
     def __repr__(self):
         return '<Library %r>' % self.toke
 
-# manager = flask.ext.restless.APIManager(app, flask_sqlalchemy_db=db)
-# manager.create_api(Event, methods=['GET', 'POST', 'DELETE'])
+
 """
 LOGIC
 """
-
 
 
 @app.after_request
@@ -102,7 +102,7 @@ URLS/VIEWS
 @app.route('/', methods=['GET', 'POST'])
 def front_page():
     library = request.cookies.get('library_id') or Library.query.first().id
-    return redirect(url_for('show_entries', library_id=library))
+    return redirect(url_for('home', library_id=library))
 
 
 if __name__ == '__main__':
