@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, redirect, url_for, render_template, flash, make_response, jsonify, send_file
 from flask.ext.sqlalchemy import SQLAlchemy
 # import flask.ext.restless
@@ -48,7 +49,7 @@ class Work(db.Model):
 
 class Agent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
+    name = db.Column(db.String(150))
     birth_date = db.Column(db.DateTime)
     death_date = db.Column(db.DateTime)
     wiki_page = db.Column(db.Text)
@@ -57,6 +58,15 @@ class Agent(db.Model):
 
     def __repr__(self):
         return '<Agent %r>' % self.name
+
+    def __init__(self,id=id,name=name,birth_date=birth_date,death_date=death_date,wiki_page=wiki_page):
+        self.id = id
+        self.name = name
+        self.birth_date = birth_date
+        self.death_date = death_date
+        self.wiki_page = wiki_page
+
+
 
 class Alias(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -104,6 +114,19 @@ def front_page():
     library = request.cookies.get('library_id') or Library.query.first().id
     return redirect(url_for('home', library_id=library))
 
+@app.route('/agent/<name>')
+def show_agent(name):
+	agent = Agent.query.filter_by(Agent.name.like(name)).first_or_404()
+	return render_template('show_agent.html',agent=agent)
+
+@app.route('/agents')
+def show_agents():
+	agents = Agent.query.order_by(Agent.name)
+	return render_template('agents.html',agents=agents)
+	
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 if __name__ == '__main__':
     # app.debug = True
