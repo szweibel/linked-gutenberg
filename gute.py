@@ -106,19 +106,20 @@ URLS/VIEWS
 
 
 # View for the Homepage
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def front_page():
-    library = request.cookies.get('library_id') or Library.query.first().id
-    return redirect(url_for('home', library_id=library))
+    return render_template('index.html')
 
 @app.route('/agent/<name>')
 def show_agent(name):
-	agent = Agent.query.filter_by(Agent.name.like(name)).first_or_404()
+	agent = Agent.query.filter(Agent.name.like(name)).first_or_404()
 	return render_template('show_agent.html',agent=agent)
 
-@app.route('/agents')
-def show_agents():
-	agents = Agent.query.order_by(Agent.name)
+@app.route('/agents',methods = ['GET','POST'])
+@app.route('/agents/<int:page>',methods=['GET','POST'])
+def show_agents(page=1):
+	agents = Agent.query.filter(Agent.name != None).order_by(Agent.name).paginate(page,50,False)
+	print(agents)
 	return render_template('agents.html',agents=agents)
 	
 @app.errorhandler(404)

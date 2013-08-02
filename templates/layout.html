@@ -1,7 +1,7 @@
 <!doctype html>
 <title>Linked Gutenberg</title>
 <div class=page>
-	<h1>Linked Gutenberg</h1>
+	<h1><a href="{{ url_for('front_page') }}">Linked Gutenberg</a></h1>
 	{% for message in get_flashed_messages() %}
 		<div class=flash>{{message}}</div>
 	{% endfor %}

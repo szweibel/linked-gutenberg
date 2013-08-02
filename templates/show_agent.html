@@ -1,11 +1,17 @@
 {% extends "layout.html" %}
 {% block body %}
+  <h2>{{ agent.name }}<small>(# {{agent.id}})</h2>
   <ul>
-    <li><h2>{{ agent.name }}<small>(# {{agent.id}})</h2></li>
-    <li>Born {{agent.birth_date}}</li>
-    <li>Died {{agent.death_date}}</li>
-    <li><a href={{agent.wiki_page}}>wiki</a></li>
-    {% if agent.aliases %}
+    <li>Born: {{agent.birth_date or 'None Given'}}</li>
+    <li>Died: {{agent.death_date or 'None Given'}}</li>
+    <li>
+      {% if agent.wiki_page %}
+      <a href={{agent.wiki_page}}>wiki</a>
+      {% else %}
+      No known wiki page
+      {% endif %}
+    </li>
+    {% if agent.aliases.all() %}
     <li>Known Aliases: 
       <ul>
         {% for alias in agent.aliases %}

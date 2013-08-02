@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h3>Agents</h3>
+  {% if agents %}
+    <h4>{{ agents.items[0].name }} to {{ agents.items[-1].name }}</h4> 
+    {% if agents.has_prev %}
+      <a href="{{ url_for('show_agents',page=agents.prev_num) }}">Previous</a>
+    {% endif %}
+    {% if agents.has_next %}
+      <a href="{{ url_for('show_agents',page=agents.next_num) }}">Next</a>
+    {% endif %}
+    <ul>
+    {% for agent in agents.items %}
+      {% if agent.name %}
+      <li>
+        <a href='{{ url_for("show_agent",name=agent.name) }}'> 
+          {{agent.name}}, id # {{agent.id}}
+        </a>
+      </li>
+      {% endif %}
+    {% endfor %}
+    </ul>
+  {% else %}
+  <h3>No agents found!</h3>
+  {% endif %}
+{% endblock %}
