@@ -16,7 +16,6 @@ db = SQLAlchemy(app)
 MODELS
 """
 
-
 agents = db.Table('agents',
     db.Column('agent_id', db.Integer, db.ForeignKey('agent.id')),
     db.Column('work_id', db.Integer, db.ForeignKey('work.id'))
@@ -66,12 +65,10 @@ class Agent(db.Model):
         self.death_date = death_date
         self.wiki_page = wiki_page
 
-
-
 class Alias(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'))
+    #id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50),primary_key=True)
+    agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'),primary_key=True)
 
     def __repr__(self):
         return '<Alias %r>' % self.name
@@ -85,7 +82,7 @@ class LCSH(db.Model):
 
 
 class Token(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     toke = db.Column(db.String(80))
 
     def __repr__(self):
