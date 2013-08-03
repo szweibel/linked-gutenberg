@@ -29,7 +29,7 @@ headings = db.Table('headings',
 tokens = db.Table('tokens',
     db.Column('token_id', db.Integer, db.ForeignKey('token.id'), primary_key=True),
     db.Column('work_id', db.Integer, db.ForeignKey('work.id'), primary_key=True),
-    db.Column('position', db.Integer)
+    db.Column('position', db.Integer,primary_key=True)
 )
 
 class Work(db.Model):
@@ -45,6 +45,13 @@ class Work(db.Model):
     def __repr__(self):
         return '<%r: %r>' % (self.call_number, self.title)
 
+    def __init__(self,id=work_id,agents=agents,title=title,publiction_date=pub_date,call_number=call_no,lcsh=lcsh):
+    	self.id = work_id
+    	self.agents.extend(agents)
+    	self.title = title
+    	self.publication_date = pub_date
+    	self.call_number = call_no
+    	self.lcsh = lcsh
 
 class Agent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -69,16 +76,24 @@ class Alias(db.Model):
     #id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50),primary_key=True)
     agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'),primary_key=True)
+    agent = db.relationship('Agent',backref='aliases')
 
     def __repr__(self):
         return '<Alias %r>' % self.name
 
+	def __init__(self,name=name,id=agent_id):
+		self.name = name
+		self.agent_id = agent_id
+
 class LCSH(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     subject_heading = db.Column(db.Text)
 
     def __repr__(self):
         return '<LCSH %r>' % self.subject_heading
+
+	def __init__(self,subject_heading=sh):
+		self.subject_heading = sh
 
 
 class Token(db.Model):
@@ -87,6 +102,9 @@ class Token(db.Model):
 
     def __repr__(self):
         return '<Library %r>' % self.toke
+
+    def __init__(self,toke=toke):
+    	self.toke = toke
 
 
 """
@@ -112,13 +130,13 @@ def front_page():
 
 @app.route('/agent/<name>')
 def show_agent(name):
-	agent = Agent.query.filter(Agent.name.like(name)).first_or_404()
+	agent = Agent.query.filter(Agent.name.like('%'+name+'%')).first_or_404()
 	return render_template('show_agent.html',agent=agent)
 
 @app.route('/agents',methods = ['GET','POST'])
 @app.route('/agents/<int:page>',methods=['GET','POST'])
 def show_agents(page=1):
-	agents = Agent.query.filter(Agent.name != None).order_by(Agent.name).paginate(page,50,False)
+	agents = Agent.query.filter(Agent.name != None).order_by(Agent.name).paginate(page,50)
 	print(agents)
 	return render_template('agents.html',agents=agents)
 	
