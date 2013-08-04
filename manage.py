@@ -1,5 +1,5 @@
 from flask.ext.script import Manager
-from gute import *
+from gute import db, Work, Agent, Alias, app
 from datetime import datetime
 
 manager = Manager(app)
@@ -14,13 +14,13 @@ def restart_db():
     a_work = Work(title='My Autobiography', agents=[author, another_author])
 
     db.session.add(a_work)
-
     db.session.commit()
 
 
 @manager.command
-def rdf_import(which):
-    db.session.commit()
+def empty_and_init(which):
+    db.drop_all()
+    db.create_all()
 
 
 
