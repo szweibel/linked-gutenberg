@@ -18,7 +18,7 @@ def restart_db():
 
 
 @manager.command
-def empty_and_init(which):
+def empty_and_init():
     db.drop_all()
     db.create_all()
 
