@@ -103,24 +103,27 @@ URLS/VIEWS
 def front_page():
     return render_template('index.html')
 
+
 @app.route('/agent/<name>')
 def show_agent(name):
     agent = Agent.query.filter(Agent.name.like('%'+name+'%')).first_or_404()
-    return render_template('show_agent.html',agent=agent)
+    return render_template('show_agent.html', agent=agent)
 
-@app.route('/agents',methods = ['GET','POST'])
-@app.route('/agents/<int:page>',methods=['GET','POST'])
+
+@app.route('/agents', methods = ['GET', 'POST'])
+@app.route('/agents/<int:page>', methods=['GET', 'POST'])
 def show_agents(page=1):
-    agents = Agent.query.filter(Agent.name != None).order_by(Agent.name).paginate(page,50)
+    agents = Agent.query.filter(Agent.name != None).order_by(Agent.name).paginate(page, 50)
     print(agents)
-    return render_template('agents.html',agents=agents)
+    return render_template('agents.html', agents=agents)
+
 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
 if __name__ == '__main__':
-    # app.debug = True
+    app.debug = True
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
