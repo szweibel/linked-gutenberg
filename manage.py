@@ -5,7 +5,7 @@ from datetime import datetime
 manager = Manager(app)
 
 @manager.command
-def restart_db():
+def test_db():
     db.drop_all()
     db.create_all()
 
@@ -18,11 +18,10 @@ def restart_db():
 
 
 @manager.command
-def empty_and_init():
+def init():
     db.drop_all()
     db.create_all()
-
-
+    import db_load_serialized_agents
 
 
 if __name__ == "__main__":

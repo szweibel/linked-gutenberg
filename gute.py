@@ -49,8 +49,8 @@ class Work(db.Model):
 class Agent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150))
-    birth_date = db.Column(db.DateTime)
-    death_date = db.Column(db.DateTime)
+    birth_date = db.Column(db.String(30))
+    death_date = db.Column(db.String(30))
     wiki_page = db.Column(db.Text)
     aliases = db.relationship('Alias', backref='agent',
                                     lazy='dynamic')

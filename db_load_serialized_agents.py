@@ -11,14 +11,9 @@ g.parse("serialized_agents.nt", format="nt")
 
 agents = defaultdict(dict)
 predicates_to_skip = {URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), # skip b/c we know they're agents
-    URIRef('http://www.gutenberg.org/2009/pgterms/alias'),  # skip to handle later
-    URIRef('http://www.gutenberg.org/2009/pgterms/deathdate'),  # skip b/c below error
-    URIRef('http://www.gutenberg.org/2009/pgterms/birthdate')}  # skip b/c below error
-'''
-Saving years to database is failing right now because of a limitation in the datetime.strfrtime method
-that won't handle pre-1900 years
-See: http://stackoverflow.com/questions/6571562/python-time-module-wont-handle-year-before-1900
-'''
+    URIRef('http://www.gutenberg.org/2009/pgterms/alias')}  # skip to handle later
+    # URIRef('http://www.gutenberg.org/2009/pgterms/deathdate'),  # skip b/c below error
+    # URIRef('http://www.gutenberg.org/2009/pgterms/birthdate')}  # skip b/c below error
 predicate_column_type = {
     URIRef('http://www.gutenberg.org/2009/pgterms/name'): ('name', 'text'),
     URIRef('http://www.gutenberg.org/2009/pgterms/webpage'): ('wiki_page', 'text'),
