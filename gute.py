@@ -16,12 +16,12 @@ db = SQLAlchemy(app)
 MODELS
 """
 
-agents = db.Table('agents',
+agent_work = db.Table('agent_work',
     db.Column('agent_id', db.Integer, db.ForeignKey('agent.id')),
     db.Column('work_id', db.Integer, db.ForeignKey('work.id'))
 )
 
-headings = db.Table('headings',
+LCSH_work = db.Table('LCSH_work',
     db.Column('LCSH_id', db.Integer, db.ForeignKey('LCSH.id')),
     db.Column('work_id', db.Integer, db.ForeignKey('work.id'))
 )
@@ -34,12 +34,12 @@ tokens = db.Table('tokens',
 
 class Work(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    agents = db.relationship('Agent', secondary=agents,
+    agents = db.relationship('Agent', secondary=agent_work,
             backref=db.backref('works', lazy='dynamic'))
     title = db.Column(db.Text)
     publication_date = db.Column(db.DateTime)
     call_number = db.Column(db.Text)
-    LCSH = db.relationship('LCSH', secondary=headings,
+    LCSH = db.relationship('LCSH', secondary=LCSH_work,
             backref=db.backref('works', lazy='dynamic'))
 
     def __repr__(self):
@@ -59,7 +59,6 @@ class Agent(db.Model):
         return '<Agent %r>' % self.name
 
 class Alias(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50),primary_key=True)
     agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'),primary_key=True)
 
