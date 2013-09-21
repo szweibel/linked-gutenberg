@@ -7,11 +7,13 @@
       </dt>
       <dd>  
         {% for agent in work.agents %}
+        {% if agent.name %}
             <li>
                 <a href='{{ url_for("show_agent",name=agent.name) }}'> 
                      {{agent.name}}, id # {{agent.id}}
                 </a>
-             </li>
+                </li>
+        {% endif %}
          {% endfor %}
          </ul>
       </dd>
