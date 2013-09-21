@@ -15,10 +15,21 @@
     <li>Known Aliases: 
       <ul>
         {% for alias in agent.aliases %}
-          <li>{{ alias }}</li>
+          <li>{{ alias.name }}</li>
         {% endfor %}
       </ul>
     </li>
     {% endif %}
-  </ul>
+    <li>Works:
+        <ul>
+            {% for work in agent.works %}
+            <li>
+                <a href='{{url_for('show_work',title=work.title)}}'>
+                    {{ work.title }}
+                </a>    
+            </li>
+            {% endfor %}
+        </ul>
+    </li>
+    </ul>
 {% endblock %}

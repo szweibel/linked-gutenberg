@@ -1,7 +1,10 @@
 import os, fnmatch, datetime
-from gute import Agent,db,LCSH,Work,Alias,
+import logging
+from gute import Agent,db,LCSH,Work,Alias
 from rdflib import Graph
 from rdflib.namespace import DCTERMS,RDF,Namespace
+
+logging.basicConfig()
 
 PGTERMS = Namespace('http://www.gutenberg.org/2009/pgterms/')
 
@@ -28,13 +31,14 @@ class PGGraph(Graph):
 			('wiki_page',PGTERMS.webpage,True,self._safe_string),
 
 
-			('aliases',PGTERMS.alias,False,lambda x:[self._safe_string(y) for y in x])
+                        ('aliases',PGTERMS.alias,False,lambda x:[self._safe_string(y)[:150] for y in x if y==str(y)])
 		)
 		self._work_map = (
 			('title',self._get_title),
 			('lcsh',self._get_lcsh),
 			('lcc',self._get_lcc),
-			('agents',self._get_agents)
+			('agents',self._get_agents),
+                        ('texts',self._get_text_urls)
 		)
 
 	def get_work_id(self):
@@ -55,7 +59,7 @@ class PGGraph(Graph):
 				self._work_info[target] = method()
 			return self._work_info
 
-	def get_file_urls(self):
+	def _get_text_urls(self):
 		'''
 		returns set of file urls for the different versions of this text
 		'''
@@ -95,8 +99,15 @@ class PGGraph(Graph):
 				?a rdf:value ?lcsh .
 				}
 			'''
-		return [self._safe_string(r[0]) for r in self.query(query)]
-
+                lcshs = []
+                for r in self.query(query):
+                    #break apart, strip, and limit LCSH to 100 characters
+                    try:
+                         lcshs.extend([s.strip()[:100] for s in self._safe_string(r[0]).split('--')])
+                    except AttributeError:
+                        continue
+                return lcshs
+            
 	def _get_lcc(self):
 		'''
 		Uses SPARQL to gather LCC information, which is then decoded
@@ -155,22 +166,22 @@ class PGGraph(Graph):
 			#do something
 			return None
 		return string
-
-def save_PGGraphs(pgs):
-	'''
-	writes PGGraphs to DB as appropriate objects
-	'''
-	lcsh = set()
-	lcc = set()
-	works = {}
-	agents = {}
-
-	for pg in pgs:
-		info = pg.get_work_info()
-		works[pg.get_work_id()] = info
-		lcsh.update(info['lcsh'])
-		lcc.update(info['lcc'])
-		agents.update(info['agents'])
-
-	#INSERT IGNORE ALL LCSH, ALL LCC
-	
+#
+#def save_pggraphs(pgs):
+#       '''
+#       writes pggraphs to db as appropriate objects
+#       '''
+#       lcsh = set()
+#       lcc = set()
+#       works = {}
+#       agents = {}
+#
+#       for pg in pgs:
+#       	info = pg.get_work_info()
+#       	works[pg.get_work_id()] = info
+#       	lcsh.update(info['lcsh'])
+#       	lcc.update(info['lcc'])
+#       	agents.update(info['agents'])
+#
+#       #insert ignore all lcsh, all lcc
+#       

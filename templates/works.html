@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h3>Works</h3>
+  {% if works %}
+    <h4>{{ works.items[0].title }} to {{ works.items[-1].title }}</h4> 
+    {% if works.has_prev %}
+      <a href="{{ url_for('show_works',page=works.prev_num) }}">Previous</a>
+    {% endif %}
+    {% if works.has_next %}
+      <a href="{{ url_for('show_works',page=works.next_num) }}">Next</a>
+    {% endif %}
+    <ul>
+    {% for work in works.items %}
+      {% if work.title %}
+      <li>
+        <a href='{{ url_for("show_work",title=work.title) }}'> 
+          {{work.title}}, id # {{work.id}}
+        </a>
+        <ul>
+        {% for agent in work.agents %}
+        {% if agent.name %}
+            <li>
+                <a href='{{ url_for("show_agent",name=agent.name) }}'> 
+                     {{agent.name}}, id # {{agent.id}}
+                </a>
+            </li>
+        {% endif %}
+         {% endfor %}
+         </ul>
+      </li>
+      {% endif %}
+    {% endfor %}
+    </ul>
+  {% else %}
+  <h3>No works found!</h3>
+  {% endif %}
+{% endblock %}

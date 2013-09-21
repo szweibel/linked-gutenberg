@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>{{ work.title }}<small>(# {{work.id}})</small></h2>
+  <dl>
+      <dt>
+        Agents:
+      </dt>
+      <dd>  
+        {% for agent in work.agents %}
+            <li>
+                <a href='{{ url_for("show_agent",name=agent.name) }}'> 
+                     {{agent.name}}, id # {{agent.id}}
+                </a>
+             </li>
+         {% endfor %}
+         </ul>
+      </dd>
+      <dt>
+        LCC:
+      </dt>
+      <dd>
+        {{ work.call_number }}
+      </dd>
+      <dt>
+        LCSH:
+      </dt>
+      <dd>
+        <ul>
+        {% for LCSH in work.LCSH %}
+            <li>
+                <a href='{{ url_for("show_LCSH",subject_heading=LCSH.subject_heading) }}'>
+                     {{ LCSH.subject_heading }}
+                 </a>
+            </li>
+        {% endfor %}
+    </ul>
+      </dd>
+      <dt>
+        File links:
+      </dt>
+      <dd>
+        <ul>
+            {% for text in work.texts %}
+             <li>
+                <a href='{{text.url}}'>{{text.url}}</a>
+            </li>
+            {% endfor %}
+         </ul>
+     </dd>
+  </dl>
+{% endblock %}

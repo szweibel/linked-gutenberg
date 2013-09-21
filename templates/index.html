@@ -1,4 +1,14 @@
 {% extends "layout.html" %}
 {% block body %}
-  <a href="{{ url_for('show_agents') }}">See all agents</a>
+<ul>
+    <li>
+    <a href="{{ url_for('show_agents') }}">See all agents ({{agent}} total)</a>
+    </li>
+    <li>
+    <a href="{{ url_for('show_works') }}">See all works ({{work}} total)</a>
+    </li>
+    <li>
+    <a href="{{ url_for('show_LCSHs') }}">See all subject headings ({{lcsh}} total)</a>
+    </li>
+</ul>
 {% endblock %}

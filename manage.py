@@ -21,7 +21,7 @@ def test_db():
 def init():
     db.drop_all()
     db.create_all()
-    import db_load_serialized_agents
+#    import db_load_serialized_agents
 
 
 if __name__ == "__main__":

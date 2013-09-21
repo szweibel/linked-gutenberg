@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>{{lcsh.subject_heading}}</h2>
+    <h3>
+        Works with this subject heading
+    </h3>
+    <ol>
+        {% for work in lcsh.works %}
+        {% if work.title %}
+            <li>
+                <a href="{{url_for('show_work',title=work.title)}}">{{work.title}}</a>
+            </li>
+        {% endif %}
+        {% endfor %}
+    </ol>
+{% endblock %}
