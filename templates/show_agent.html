@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h2>{{ agent.name }}<small>(# {{agent.id}})</h2>
+<h2>{{ agent.name }}<small>(# {{agent.id}})</h2></small>
   <ul>
     <li>Born: {{agent.birth_date or 'None Given'}}</li>
     <li>Died: {{agent.death_date or 'None Given'}}</li>
