@@ -21,15 +21,17 @@
     </li>
     {% endif %}
     <li>Works:
-        <ul>
+        <ol>
             {% for work in agent.works %}
+            {% if work.title %}
             <li>
                 <a href='{{url_for('show_work',title=work.title)}}'>
                     {{ work.title }}
                 </a>    
             </li>
+            {% endif %}
             {% endfor %}
-        </ul>
+        </ol>
     </li>
     </ul>
 {% endblock %}
