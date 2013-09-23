@@ -113,37 +113,66 @@ def front_page():
 
 @app.route('/agent/<name>')
 def show_agent(name):
-    agent = Agent.query.filter(Agent.name.like('%'+name+'%')).first_or_404()
-    return render_template('show_agent.html', agent=agent)
-
+    agent = Agent.query.filter(Agent.name==name).first_or_404()
+    return render_template('show_agent.html',agent=agent)
 
 @app.route('/agents', methods = ['GET', 'POST'])
 @app.route('/agents/<int:page>', methods=['GET', 'POST'])
-def show_agents(page=1):
-    agents = Agent.query.filter(Agent.name != None).order_by(Agent.name).paginate(page, 50)
-    return render_template('agents.html', agents=agents)
-
-@app.route('/works',methods=['GET','POST'])
-@app.route('/works/<int:page>', methods=['GET', 'POST'])
-def show_works(page=1):
-    works = Work.query.filter(Work.title != None).order_by(Work.title).paginate(page,50)
-    return render_template('works.html',works=works)
+@app.route('/agents/<name>/<int:page>',methods=['POST','GET'])
+@app.route('/agents/<name>',methods=['POST','GET'])
+def show_agents(name='',page=1):
+    if name == '':
+        agents = Agent.query.filter(Agent.name != None).order_by(Agent.name).paginate(page, 50)
+    else: #essentially a search mode
+        agents = Agent.query.filter(Agent.name.like('%'+name+'%')).order_by(Agent.name).paginate(page,50)
+    return render_template('agents.html',agents=agents,name=name) if agents.total > 0 else (render_template('404.html'),404)
 
 @app.route('/work/<title>',methods=['GET','POST'])
 def show_work(title):
     work = Work.query.filter(Work.title.like('%'+title+'%')).first_or_404()
     return render_template('show_work.html', work=work)
 
-@app.route('/LCSHs',methods=['GET','POST'])
-@app.route('/LCSHs/<int:page>',methods=['GET','POST'])
-def show_LCSHs(page=1):
-    lcshs = LCSH.query.order_by(LCSH.subject_heading).paginate(page,50)
-    return render_template('LCSHs.html',lcshs=lcshs)
+@app.route('/works',methods=['GET','POST'])
+@app.route('/works/<int:page>', methods=['GET', 'POST'])
+@app.route('/works/<title>/<int:page>',methods=['POST','GET'])
+@app.route('/works/<title>',methods=['POST','GET'])
+def show_works(title='',page=1):
+    if title == '':
+        works = Work.query.filter(Work.title != None).order_by(Work.title).paginate(page,50)
+    else: #search mode
+        works = Work.query.filter(Work.title.like('%'+title+'%')).order_by(Work.title).paginate(page,50)
+    return render_template('works.html',works=works,title=title) if works.total > 0 else render_template('404.html'),404
 
 @app.route('/LCSH/<subject_heading>',methods=['GET','POST'])
 def show_LCSH(subject_heading):
     lcsh = LCSH.query.filter(LCSH.subject_heading.like('%'+subject_heading+'%')).first_or_404()
     return render_template('show_LCSH.html',lcsh=lcsh)
+
+@app.route('/LCSHs',methods=['GET','POST'])
+@app.route('/LCSHs/<int:page>',methods=['GET','POST'])
+@app.route('/LCSHs/<subject_heading>/<int:page>',methods=['POST','GET'])
+@app.route('/LCSHs/<subject_heading>',methods=['POST','GET'])
+def show_LCSHs(page=1,subject_heading=''):
+    if subject_heading == '':
+        lcshs = LCSH.query.order_by(LCSH.subject_heading).paginate(page,50)
+    else: #search mode
+        lcshs = LCSH.query.filter(LCSH.subject_heading.like('%'+subject_heading+'%')).order_by(LCSH.subject_heading).paginate(page,50)
+    return render_template('LCSHs.html',lcshs=lcshs,subject_heading=subject_heading) if lcshs.total > 0 else render_template('404.html'),404
+
+@app.route('/search')
+def search_form():
+    form_redirects = {
+            'agents' : ('show_agents','name'),
+            'works' : ('show_works','title'),
+            'lcshs' : ('show_LCSHs','subject_heading')
+            }
+    print {key:request.values[key] for key in form_redirects[request.values['class_type']][1:]}
+    try:
+        return redirect(url_for(form_redirects[request.values['class_type']][0],
+                **{key:request.values[key].strip() for key in form_redirects[request.values['class_type']][1:]}))
+    except AttributeError:
+        flash('There was a problem with the search')
+        return redirect(url_for(page_not_found))
 
 @app.errorhandler(404)
 def page_not_found(e):

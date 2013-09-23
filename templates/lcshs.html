@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h3>Library of Congress Subject Headings</h3>
+<h3>{% if subject_heading == '' %} All Library of Congress Subject Headings {% else %} Subject Headings like '{{subject_heading}}' {%endif%} <small>({{lcshs.total}} total)</small></h3>
   {% if lcshs %}
   <h4>{{ lcshs.items[0].subject_heading }} to {{ lcshs.items[-1].subject_heading}}</h4> 
     {% if lcshs.has_prev %}
-      <a href="{{ url_for('show_LCSHs',page=lcshs.prev_num) }}">Previous</a>
+    <a href="{% if subject_heading == '' %}{{ url_for('show_LCSHs',page=lcshs.prev_num) }}{% else %}{{ url_for('show_LCSHs',page=lcshs.prev_num,subject_heading=subject_heading) }}{%endif%}">Previous</a>
     {% endif %}
     {% if lcshs.has_next %}
-      <a href="{{ url_for('show_LCSHs',page=lcshs.next_num) }}">Next</a>
+    <a href="{% if subject_heading == '' %}{{ url_for('show_LCSHs',page=lcshs.next_num) }}{% else %}{{ url_for('show_LCSHs',page=lcshs.next_num,subject_heading=subject_heading) }}{%endif%}">Next</a>
     {% endif %}
     <ul>
     {% for lcsh in lcshs.items %}

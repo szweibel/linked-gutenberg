@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h3>Agents</h3>
+<h3>{% if name == '' %} All agents {% else %} Agents with names like '{{name}}' {% endif %} <small>({{agents.total}} total)</small></h3>
   {% if agents %}
-    <h4>{{ agents.items[0].name }} to {{ agents.items[-1].name }}</h4> 
+  <h4>{{ agents.items[0].name }} to {{ agents.items[-1].name }}</h4> 
     {% if agents.has_prev %}
-      <a href="{{ url_for('show_agents',page=agents.prev_num) }}">Previous</a>
+    <a href="{% if name == '' %}{{ url_for('show_agents',page=agents.prev_num) }}{% else %}{{ url_for('show_agents',page=agents.prev_num,name=name) }}{%endif%}">Previous</a>
     {% endif %}
     {% if agents.has_next %}
-      <a href="{{ url_for('show_agents',page=agents.next_num) }}">Next</a>
+    <a href="{% if name == '' %}{{ url_for('show_agents',page=agents.next_num) }}{% else %}{{ url_for('show_agents',page=agents.next_num,name=name) }}{%endif%}">Next</a>
     {% endif %}
     <ul>
     {% for agent in agents.items %}

@@ -1,14 +1,24 @@
 {% extends "layout.html" %}
 {% block body %}
+{% macro search_form(name,reference,class_type) -%}
+    <form method=get action='{{url_for('search_form')}}'>
+        <input type=text name={{name}} placeholder='{{reference}}'>
+        <input type=hidden name=class_type value='{{class_type}}'/>
+        <input type=submit value='search'>
+    </form>
+{%- endmacro %}
 <ul>
     <li>
     <a href="{{ url_for('show_agents') }}">See all agents ({{agent}} total)</a>
+    {{ search_form('name','agent name','agents') }}
     </li>
     <li>
     <a href="{{ url_for('show_works') }}">See all works ({{work}} total)</a>
+    {{ search_form('title','work title','works') }}
     </li>
     <li>
     <a href="{{ url_for('show_LCSHs') }}">See all subject headings ({{lcsh}} total)</a>
+    {{ search_form('subject_heading','subject headings','lcshs') }}
     </li>
 </ul>
 {% endblock %}
