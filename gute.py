@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, redirect, url_for, render_template, flash, make_response, jsonify, send_file
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy import func
-# import flask.ext.restless
+from flask.ext.restless import APIManager
 
 # create application
 app = Flask('gute')
@@ -11,7 +11,8 @@ app.config.from_pyfile('settings.cfg')
 
 # connect to database
 db = SQLAlchemy(app)
-
+# Instatiate API
+manager = APIManager(app, flask_sqlalchemy_db=db)
 
 """
 MODELS
@@ -88,6 +89,12 @@ class Token(db.Model):
     def __repr__(self):
         return '<Library %r>' % self.toke
 
+# create API locations
+manager.create_api(Agent, methods=['GET'])
+manager.create_api(Alias, methods=['GET'])
+manager.create_api(Work, methods=['GET'])
+manager.create_api(LCSH, methods=['GET'])
+manager.create_api(Text, methods=['GET'])
 
 """
 LOGIC
