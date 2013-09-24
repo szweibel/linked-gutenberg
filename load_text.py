@@ -1,15 +1,24 @@
-import re
+import re, requests
+from zipfile import ZipFile
+from StringIO import StringIO
+from urlparse import urlparse
+from os.path import basename,splitext
 
-def pretend_callback(work):
-    pass
+def get_file_within_zip(url,content):
+    filename,extension = splitext(basename(urlparse(url).path))     
+    return unzip_file(filename+'.txt',content)
 
-        # extension, file type test, formatting callback for all supported file types
-file_types = (
-        ('-0.zip',lambda f:'-0.zip' in f,pretend_callback), #zipped unicode
-        ('.zip',lambda f: '.zip' in f and not re.search(r'-.*\.zip$',f),pretend_callback), #zipped ASCII
-        ('-0.txt',lambda f: '-0.txt' in f,pretend_callback), #unicode
-        ('.txt.utf-8',lambda f:'.txt.utf-8' in f,pretend_callback), #utf-8
-        ('.txt',lambda f: '.txt' in f and not re.search(r'-.*\.txt$',f),pretend_callback) #ASCII
+def placeholder_callback(url,content):
+    return content
+
+        # extension, file type test, formatting callback for all supported file types 
+        # each callback receives both the url  and the file contentt
+file_types = ( 
+        ('-0.zip',lambda f:'-0.zip' in f,get_file_within_zip)#zipped unicode
+        ('.zip',lambda f: '.zip' in f and not re.search(r'-.*\.zip$',f),get_file_within_zip), #zipped ASCII
+        ('-0.txt',lambda f: '-0.txt' in f,placeholder_callback) #unicode
+        ('.txt.utf-8',lambda f:'.txt.utf-8' in f,placeholder_callback), #utf-8
+        ('.txt',lambda f: '.txt' in f and not re.search(r'-.*\.txt$',f),placeholder_callback) #ASCII
     )
 
 test_list = [
@@ -43,14 +52,15 @@ def get_text_list(filenames):
                 return_list.append((filename,ext,callback))
                 break
     if not return_list: raise Exception('No suitable files found')
-    return sorted(natural_sort(return_list),key=lambda f:partial_index(0,f[1],file_types))
+    return sorted(natural_file_sort(return_list),key=lambda f:partial_index(0,f[1],file_types))
 
-def natural_sort(l):  
+def natural_file_sort(l):  
     '''
-    from http://stackoverflow.com/a/4836734/1567452
+    from http://stackoverflow.com/a/4836734/1567452 but added the extra step
+    of removing the file extension.
     '''
     convert = lambda text: int(text) if text.isdigit() else text.lower() 
-    alphanum_key = lambda file_info: [ convert(c) for c in re.split('([0-9]+)', file_info[0])] 
+    alphanum_key = lambda file_info: [ convert(c) for c in re.split('([0-9]+)', file_info[0].replace(file_info[1],''))] 
     return sorted(l, key = alphanum_key)
 
 def sort_text_list((text_info)):
@@ -65,6 +75,39 @@ def partial_index(index,term,tup_of_tups):
     for i,tup in enumerate(tup_of_tups):
         if tup[index] == term: return i
     raise ValueError('This value doesn\'t exist in any of this iterable\'s tuples') 
+
+def download_file(url):
+    '''
+    Process for downloading file
+    '''
+    r = requests.get(url)
+    r.raise_for_status()
+    print 'Downloaded '+url
+    return r.content
+
+def unzip_file(filename,content):
+    '''
+    Unzip file -- will raise KeyError if file not present
+    '''
+    z = ZipFile(StringIO(content))
+    return z.read(filename)
+
+def get_corpus(filenames):
+    suitable_files = get_text_list(filenames) 
+    for url,ext,callback in suitable_files:
+        print 'Trying '+url
+        try:
+            dled = download_file(url)
+        except requests.exceptions.HTTPError as e:
+            print 'Downloading '+url+' failed with a '+str(e.errno)+'status code'
+            continue 
+        try:
+            formatted = callback(dled) 
+        except Exception as e:
+            print 'Formatting callback failed for '+url+': '+e
+        assert formatted  
+        return formatted
+    raise Exception('Unable to download from any of the suitable links') 
 
 if __name__ == '__main__':
     for filename in get_text_list(test_list):
