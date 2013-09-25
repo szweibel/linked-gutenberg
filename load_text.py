@@ -14,9 +14,9 @@ def placeholder_callback(url,content):
         # extension, file type test, formatting callback for all supported file types 
         # each callback receives both the url  and the file contentt
 file_types = ( 
-        ('-0.zip',lambda f:'-0.zip' in f,get_file_within_zip)#zipped unicode
+        ('-0.zip',lambda f:'-0.zip' in f,get_file_within_zip),#zipped unicode
         ('.zip',lambda f: '.zip' in f and not re.search(r'-.*\.zip$',f),get_file_within_zip), #zipped ASCII
-        ('-0.txt',lambda f: '-0.txt' in f,placeholder_callback) #unicode
+        ('-0.txt',lambda f: '-0.txt' in f,placeholder_callback), #unicode
         ('.txt.utf-8',lambda f:'.txt.utf-8' in f,placeholder_callback), #utf-8
         ('.txt',lambda f: '.txt' in f and not re.search(r'-.*\.txt$',f),placeholder_callback) #ASCII
     )
@@ -102,9 +102,9 @@ def get_corpus(filenames):
             print 'Downloading '+url+' failed with a '+str(e.errno)+'status code'
             continue 
         try:
-            formatted = callback(dled) 
+            formatted = callback(url,dled) 
         except Exception as e:
-            print 'Formatting callback failed for '+url+': '+e
+            'Formatting callback failed for '+url+': '+e
         assert formatted  
         return formatted
     raise Exception('Unable to download from any of the suitable links') 
