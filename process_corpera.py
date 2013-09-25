@@ -65,6 +65,7 @@ def download_corpus(filenames):
             formatted = callback(url,dled) 
         except Exception as e:
             print 'Formatting callback failed for '+url+': '+e
+            continue
         assert formatted  
         return formatted
     raise CorpusDownloadError('Unable to download from any of the suitable links') 
