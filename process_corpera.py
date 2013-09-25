@@ -1,9 +1,11 @@
-import re, requests
+import re, requests, nltk
+from gute import Work
 from zipfile import ZipFile
 from StringIO import StringIO
 from urlparse import urlparse
 from os.path import basename,splitext
 
+# POST-DOWNLOAD CALLBACKS
 def get_file_within_zip(url,content):
     filename,extension = splitext(basename(urlparse(url).path))     
     return unzip_file(filename+'.txt',content)
@@ -11,8 +13,16 @@ def get_file_within_zip(url,content):
 def placeholder_callback(url,content):
     return content
 
-        # extension, file type test, formatting callback for all supported file types 
-        # each callback receives both the url  and the file contentt
+def unzip_file(filename,content):
+    '''
+    Unzip file -- will raise KeyError if file not present
+    '''
+    z = ZipFile(StringIO(content))
+    return z.read(filename)
+
+# SUITABLE FILE TYPES AND THEIR RELATED FUNCTIONS
+# extension, file type test, formatting callback for all supported file types 
+# each callback receives both the url  and the file contentt
 file_types = ( 
         ('-0.zip',lambda f:'-0.zip' in f,get_file_within_zip),#zipped unicode
         ('.zip',lambda f: '.zip' in f and not re.search(r'-.*\.zip$',f),get_file_within_zip), #zipped ASCII
@@ -21,6 +31,45 @@ file_types = (
         ('.txt',lambda f: '.txt' in f and not re.search(r'-.*\.txt$',f),placeholder_callback) #ASCII
     )
 
+class CorpusDownloadError(Exception):
+    pass
+
+class SuitableFileError(Exception):
+    pass
+
+#WORKFLOW FUNCTIONS
+def process_corpera(work):
+    '''
+    This is the main process -- it downloads the text, tokenizes it, and 
+    loads it into the database
+    '''
+    return download_corpus(t.url for t in work.texts)
+
+def download_corpus(filenames):
+    '''
+    This function takes a list of urls (such as those offered on the model Work),
+    sorts them by suitability and preference (e.g. perhaps preferring zipped files and 
+    particular encodings), attempts to download them, calls the designated callback 
+    for the file type (e.g. unzipping), and returns the actual corpus of the text 
+    (or raises a download error exception).
+    '''
+    suitable_files = get_suitable_files(filenames) 
+    for url,ext,callback in suitable_files:
+        print 'Trying '+url
+        try:
+            dled = download_file(url)
+        except requests.exceptions.HTTPError as e:
+            print 'Downloading '+url+' failed with a '+str(e.errno)+'status code'
+            continue 
+        try:
+            formatted = callback(url,dled) 
+        except Exception as e:
+            print 'Formatting callback failed for '+url+': '+e
+        assert formatted  
+        return formatted
+    raise CorpusDownloadError('Unable to download from any of the suitable links') 
+
+# TEST DATA
 test_list = [
     '1/2/3/4/12345/12345.txt',
     '1/2/3/4/12345/12345.zip',
@@ -39,7 +88,8 @@ test_list = [
     '1/2/3/4/12345/12345-lit.zip'
     ]
 
-def get_text_list(filenames):
+# TEXT LIST MANIPULATION
+def get_suitable_files(filenames):
     ''' 
     This function takes a list of texts and removes inappropriate ones while
     ordering them by preference based on naming conventions described here:
@@ -51,7 +101,7 @@ def get_text_list(filenames):
             if test(filename):
                 return_list.append((filename,ext,callback))
                 break
-    if not return_list: raise Exception('No suitable files found')
+    if not return_list: raise SuitableFileError('No suitable files found')
     return sorted(natural_file_sort(return_list),key=lambda f:partial_index(0,f[1],file_types))
 
 def natural_file_sort(l):  
@@ -63,10 +113,6 @@ def natural_file_sort(l):
     alphanum_key = lambda file_info: [ convert(c) for c in re.split('([0-9]+)', file_info[0].replace(file_info[1],''))] 
     return sorted(l, key = alphanum_key)
 
-def sort_text_list((text_info)):
-    filename,ext,callback = text_info
-    return file_types.index((ext,callback))
-
 def partial_index(index,term,tup_of_tups): 
     '''
     search an iterable of iterables looking for a term at a specific index of
@@ -76,6 +122,7 @@ def partial_index(index,term,tup_of_tups):
         if tup[index] == term: return i
     raise ValueError('This value doesn\'t exist in any of this iterable\'s tuples') 
 
+# Download functions
 def download_file(url):
     '''
     Process for downloading file
@@ -85,31 +132,8 @@ def download_file(url):
     print 'Downloaded '+url
     return r.content
 
-def unzip_file(filename,content):
-    '''
-    Unzip file -- will raise KeyError if file not present
-    '''
-    z = ZipFile(StringIO(content))
-    return z.read(filename)
-
-def get_corpus(filenames):
-    suitable_files = get_text_list(filenames) 
-    for url,ext,callback in suitable_files:
-        print 'Trying '+url
-        try:
-            dled = download_file(url)
-        except requests.exceptions.HTTPError as e:
-            print 'Downloading '+url+' failed with a '+str(e.errno)+'status code'
-            continue 
-        try:
-            formatted = callback(url,dled) 
-        except Exception as e:
-            'Formatting callback failed for '+url+': '+e
-        assert formatted  
-        return formatted
-    raise Exception('Unable to download from any of the suitable links') 
-
 if __name__ == '__main__':
-    for filename in get_text_list(test_list):
-        print filename
-
+    import sys
+    works = Work.query.filter(Work.id.in_(sys.argv[1:])).all()
+    for work in works:
+         print process_corpera(work)[:200]
