@@ -1,4 +1,4 @@
-import re, requests, nltk
+import re, requests
 from gute import Work
 from zipfile import ZipFile
 from StringIO import StringIO
@@ -38,12 +38,19 @@ class SuitableFileError(Exception):
     pass
 
 #WORKFLOW FUNCTIONS
-def process_corpera(work):
+def process_corpera(works):
     '''
-    This is the main process -- it downloads the text, tokenizes it, and 
-    loads it into the database
+    This is the main process -- it downloads the text, prepares it for the database,
+    and loads it into the database.
     '''
-    return download_corpus(t.url for t in work.texts)
+    for work in works:
+        try:
+            corpus = download_corpus(t.url for t in work.texts)
+        except CorpusDownloadError as e:
+            print 'Download error for {0}: {1!s}'.format(work.title,e)
+            continue
+    #begin database work
+
 
 def download_corpus(filenames):
     '''
@@ -55,16 +62,16 @@ def download_corpus(filenames):
     '''
     suitable_files = get_suitable_files(filenames) 
     for url,ext,callback in suitable_files:
-        print 'Trying '+url
+        print 'Trying {0}'.format(url)
         try:
             dled = download_file(url)
         except requests.exceptions.HTTPError as e:
-            print 'Downloading '+url+' failed with a '+str(e.errno)+'status code'
+            print 'Downloading {0} failed with a {1!s} status code.'.format(url,e)
             continue 
         try:
             formatted = callback(url,dled) 
         except Exception as e:
-            print 'Formatting callback failed for '+url+': '+e
+            print 'Formatting callback failed for {0}: {1!r}'.format(url,e)
             continue
         assert formatted  
         return formatted
