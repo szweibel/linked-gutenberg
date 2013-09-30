@@ -45,10 +45,11 @@ class Work(db.Model):
             backref=db.backref('works', lazy='dynamic'))
     texts = db.relationship('Text',backref='work',lazy='dynamic')
     corpus = db.Column(db.Text(length=4294967295))
+    def corp(self):
+        return self.corpus[:200]
 
     def __repr__(self):
         return '<%r: %r>' % (self.call_number, self.title)
-
 
 class Agent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -82,13 +83,13 @@ class LCSH(db.Model):
     def __repr__(self):
         return '<LCSH %r>' % self.subject_heading
 
-
 class Token(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     toke = db.Column(db.String(80))
 
     def __repr__(self):
         return '<Library %r>' % self.toke
+
 
 # create API locations
 manager.create_api(Agent, methods=['GET'])
@@ -150,6 +151,11 @@ def show_works(title='',page=1):
     else: #search mode
         works = Work.query.filter(Work.title.like('%'+title+'%')).order_by(Work.title).paginate(page,50)
     return render_template('works.html',works=works,title=title) if works.total > 0 else render_template('404.html'),404
+
+@app.route('/corpus/<title>',methods=['POST','GET'])
+def show_corpus(title=''):
+    work = Work.query.filter(Work.title == title).first_or_404()
+    return render_template('show_corpus.html',work=work)
 
 @app.route('/LCSH/<subject_heading>',methods=['GET','POST'])
 def show_LCSH(subject_heading):

@@ -35,8 +35,18 @@
                  </a>
             </li>
         {% endfor %}
-    </ul>
+        </ul>
       </dd>
+      <dt>
+      Corpus:
+      </dt>
+      <dd>
+        {% if work.corpus %}
+        <a href='{{ url_for("show_corpus",title=work.title) }}'>Here</a>
+        {% else %}
+        No corpus loaded
+        {% endif %}
+      </dt>
       <dt>
         File links:
       </dt>
