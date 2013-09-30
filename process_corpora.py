@@ -38,7 +38,7 @@ class SuitableFileError(Exception):
     pass
 
 #WORKFLOW FUNCTIONS
-def process_corpera(works):
+def process_corpora(works):
     '''
     This is the main process -- it downloads the text, prepares it for the database,
     and loads it into the database.
@@ -157,7 +157,7 @@ def download_file(url):
 
 if __name__ == '__main__':
     import sys
-    print 'Processing corpera...'
+    print 'Processing corpora...'
     works = Work.query.filter(Work.id.in_(sys.argv[1:])).all()
     print '{0} works found'.format(len(works))
-    process_corpera(works)
+    process_corpora(works)
