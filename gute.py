@@ -44,6 +44,7 @@ class Work(db.Model):
     LCSH = db.relationship('LCSH', secondary=LCSH_work,
             backref=db.backref('works', lazy='dynamic'))
     texts = db.relationship('Text',backref='work',lazy='dynamic')
+    corpus = db.Column(db.Text(length=4294967295))
 
     def __repr__(self):
         return '<%r: %r>' % (self.call_number, self.title)

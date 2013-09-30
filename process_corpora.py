@@ -1,5 +1,5 @@
-import re, requests
-from gute import Work
+import re, requests,subprocess, os
+from gute import Work, db
 from zipfile import ZipFile
 from StringIO import StringIO
 from urlparse import urlparse
@@ -22,7 +22,7 @@ def unzip_file(filename,content):
 
 # SUITABLE FILE TYPES AND THEIR RELATED FUNCTIONS
 # extension, file type test, formatting callback for all supported file types 
-# each callback receives both the url  and the file contentt
+# each callback receives both the url  and the file content
 file_types = ( 
         ('-0.zip',lambda f:'-0.zip' in f,get_file_within_zip),#zipped unicode
         ('.zip',lambda f: '.zip' in f and not re.search(r'-.*\.zip$',f),get_file_within_zip), #zipped ASCII
@@ -49,7 +49,22 @@ def process_corpera(works):
         except CorpusDownloadError as e:
             print 'Download error for {0}: {1!s}'.format(work.title,e)
             continue
+        tmp_file_name = 'temp_corpus.txt.tmp'
+        tmp_receive_name = 'file_to_read.txt.tmp'
+        with open(tmp_file_name,'w') as f:
+            f.write(corpus)
+        pipe = subprocess.Popen(["./stripgutenberg.pl",tmp_file_name],stdout=subprocess.PIPE)
+        stripped = pipe.stdout.read()
+        print len(stripped)
+        #os.remove(tmp_file_name)
+        if not stripped or len(stripped) == len(corpus):
+            print 'Unable to remove corpus headers for {0!s}'.format(work.title)
+            continue
+        work.corpus = stripped
+        db.session.commit()
+        print 'Processed corpus for {0!s}'.format(work.title) 
     #begin database work
+
 
 
 def download_corpus(filenames):
@@ -142,6 +157,7 @@ def download_file(url):
 
 if __name__ == '__main__':
     import sys
+    print 'Processing corpera...'
     works = Work.query.filter(Work.id.in_(sys.argv[1:])).all()
-    for work in works:
-         print process_corpera(work)[:200]
+    print '{0} works found'.format(len(works))
+    process_corpera(works)

@@ -17,6 +17,8 @@ def locate(pattern, root=os.curdir):
 
 class IDError(ValueError):
 	pass
+class NoTitleError(ValueError):
+        pass
 
 class PGGraph(Graph):
 	'''
@@ -80,13 +82,13 @@ class PGGraph(Graph):
 
 	def _get_title(self):
 		'''
-		returns title as properly decoded string -- SHOULD THIS RAISE AN EXCEPTION IF NO TITLE FOUND?
+		returns title as properly decoded string 
 		'''
-		try:
-			title_ref = self._get_single_object(subject=self._get_work_ref(),predicate=DCTERMS.title)
-		except ValueError:
-			return None #title is kind of non-vital ?
-		return self._safe_string(title_ref)
+                try:
+	            title_ref = self._get_single_object(subject=self._get_work_ref(),predicate=DCTERMS.title)
+		    return self._safe_string(title_ref)
+                except ValueError: #raised when trying to tuple unpack
+                    raise NoTitleError
 
 	def _get_lcsh(self):
 		'''
@@ -160,12 +162,12 @@ class PGGraph(Graph):
 		'''
 		Special method to decode unicode literals to string; if UnicodeEncodeError, do some special encoding business
 		'''
-		try:
-			string = str(ref)
-		except UnicodeEncodeError:
-			#do something
-			return None
-		return string
+                #ry:
+		#       string = str(ref)
+		#xcept UnicodeEncodeError:
+		#       #do something
+		#       return None
+		return unicode(ref) 
 #
 #def save_pggraphs(pgs):
 #       '''
