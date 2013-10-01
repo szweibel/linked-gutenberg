@@ -39,7 +39,7 @@ def load_into_db(works):
         refs.add(work.title)
     try:
         db.session.commit()
-        print u'Added the following texts to the DB: {0}'.format(','.join(refs))
+        print u'Added the following texts (all told, {0} of them) to the DB: {1}'.format(len(refs),','.join(refs))
     except IntegrityError:
         db.session.rollback()
         print u'Some of The following texts were already loaded into the database: {0}'.format(',\n\r'.join(refs))
