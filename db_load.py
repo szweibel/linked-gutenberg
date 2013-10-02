@@ -85,6 +85,10 @@ for i,filename in enumerate(filenames):
         if agent_id not in agents:
             agents[agent_id] = parse_agent_info(agent_id,agent_info)
         W.agents.append(agents[agent_id])
+    try: #supa hacky, like this entire script
+        W.title.decode('utf-8').encode('ascii')
+    except UnicodeDecodeError:
+        print u'Non-english characters: {0}. Skipping...'.format(W.title)
     this_batch.append(W)
     if len(this_batch) == limit:
         load_into_db(this_batch)

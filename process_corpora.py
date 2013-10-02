@@ -37,7 +37,64 @@ class CorpusDownloadError(Exception):
 class SuitableFileError(Exception):
     pass
 
-#WORKFLOW FUNCTIONS
+class HeaderStrippingError(Exception):
+    pass
+
+LIMIT = 10
+
+def import_from_csv(csv_name,prefix='',max_no=None):
+    import csv
+    id_to_file = {}
+    with open(csv_name) as csv_file:
+        reader = csv.reader(csv_file,delimiter=' ')
+        for row in reader:
+            id_to_file[row[0]] = row[1]
+    works = Work.query.filter(Work.id.in_(id_to_file.keys())).filter(Work.corpus==None).all()
+    to_pass = []
+    for i,work in enumerate(works):
+        if max_no and i > max_no:
+            raise StopIteration('Stopped at max number')
+        try:
+            work.filename = prefix+id_to_file[str(work.id)]
+        except AttributeError:
+            print 'Somehow missing the filename for {0}. Skipping it...'.format(work.title)
+            continue
+        to_pass.append(work)
+        if len(to_pass) >= 10:
+            yield to_pass
+            to_pass = []
+    if to_pass:
+        yield to_pass
+            
+       #try:
+       #    filename = filename_match(work,filenames)
+       #    filenames.remove(filename)
+       #except SuitableFileError:
+       #    print 'No file found for {0}. Skipping it...'.format(work.title)
+       #    continue
+encoding_callbacks = (
+    (),
+    ()
+    )
+
+def load_corpora(works):
+    counter = 0
+    for work in works:
+        try:
+            stripped = strip_headers(work.filename)
+        except HeaderStrippingError:
+            print 'Unable to strip headers for {0}. Skipping it...'.format(work.title)
+            continue
+        print work.filename
+        work.corpus = unicode(stripped,errors='ignore')
+        counter += 1
+        if counter == LIMIT:
+            db.session.commit()
+            print 'Commited {0} corpora'.format(LIMIT)
+            counter = 0
+    if counter:
+        db.session.commit()
+
 def process_corpora(works):
     '''
     This is the main process -- it downloads the text, prepares it for the database,
@@ -53,10 +110,7 @@ def process_corpora(works):
         tmp_receive_name = 'file_to_read.txt.tmp'
         with open(tmp_file_name,'w') as f:
             f.write(corpus)
-        pipe = subprocess.Popen(["./stripgutenberg.pl",tmp_file_name],stdout=subprocess.PIPE)
-        stripped = pipe.stdout.read()
-        print len(stripped)
-        #os.remove(tmp_file_name)
+        stripped = strip_headers(tmp_file_name)
         if not stripped or len(stripped) == len(corpus):
             print 'Unable to remove corpus headers for {0!s}'.format(work.title)
             continue
@@ -65,6 +119,9 @@ def process_corpora(works):
         print 'Processed corpus for {0!s}'.format(work.title) 
     #begin database work
 
+def strip_headers(filename):
+    pipe = subprocess.Popen(["./stripgutenberg.pl",filename],stdout=subprocess.PIPE)
+    return pipe.stdout.read()
 
 
 def download_corpus(filenames):
@@ -158,6 +215,7 @@ def download_file(url):
 if __name__ == '__main__':
     import sys
     print 'Processing corpora...'
-    works = Work.query.filter(Work.id.in_(sys.argv[1:])).all()
-    print '{0} works found'.format(len(works))
-    process_corpora(works)
+    csv_name,prefix,stop_after = sys.argv[1],sys.argv[2],sys.argv[3]
+    for works in import_from_csv(csv_name,prefix,max_no=stop_after):
+        load_corpora(works)
+
