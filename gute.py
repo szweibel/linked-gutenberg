@@ -3,6 +3,7 @@ from flask import Flask, request, redirect, url_for, render_template, flash, mak
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from flask.ext.restless import APIManager
+import nlp_gute
 
 # create application
 app = Flask('gute')
@@ -153,9 +154,16 @@ def show_works(title='',page=1):
     return render_template('works.html',works=works,title=title) if works.total > 0 else render_template('404.html'),404
 
 @app.route('/corpus/<title>',methods=['POST','GET'])
-def show_corpus(title=''):
+def show_corpus(title):
     work = Work.query.filter(Work.title == title).first_or_404()
     return render_template('show_corpus.html',work=work)
+
+@app.route('/nlpdata/<title>',methods=['POST','GET'])
+def show_nlpdata(title):
+    work = Work.query.filter(Work.title == title).first_or_404()
+    freq_dist = nlp_gute.make_ne_freq_dist(nlp_gute.named_entities(nlp_gute.tokenize_work(work.corpus)))   
+    return render_template('show_nlpdata.html',work=work,nes=freq_dist)
+
 
 @app.route('/LCSH/<subject_heading>',methods=['GET','POST'])
 def show_LCSH(subject_heading):

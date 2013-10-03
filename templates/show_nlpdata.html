@@ -38,18 +38,37 @@
         </ul>
       </dd>
       <dt>
-        NLP Data:
-        </dt>
-        <dd>
-        <a href='{{ url_for("show_nlpdata",title=work.title) }}'>Here</a>
+        NLP Data
+      </dt>
+      <dd>
+      <h3>Named Entities</h3>
+      {% for ne_type,ne_list in nes.items() %}
+        <h4>{{ ne_type }}</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Frequency
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for name,freq in ne_list %}
+                <tr>
+                    <td>
+                        {{ name }}
+                    </td>
+                    <td>
+                        {{ freq }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+      {% endfor %}
       </dd>
-      <dt>
-        corpus:
-     </dt>
-     <dd>
-        <pre>
-            {{ work.corpus }}
-        </pre>
-     </dd>
     </dl>
 {% endblock %}
