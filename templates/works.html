@@ -4,10 +4,10 @@
   {% if works %}
     <h4>{{ works.items[0].title }} to {{ works.items[-1].title }}</h4> 
     {% if works.has_prev %}
-    <a href="{% if title == '' %}{{ url_for('show_works',page=works.prev_num) }}{% else %}{{ url_for('show_works',page=works.prev_num,title=title) }}{%endif%}">Previous</a>
+    <a href="{% if title == '' %}{{ url_for('show_works',page=works.prev_num) }}{% else %}{{ url_for('show_works',page=works.prev_num,title=title) }}{%endif%}" class="button">Previous</a>
     {% endif %}
     {% if works.has_next %}
-    <a href="{% if title == '' %}{{ url_for('show_works',page=works.next_num) }}{% else %}{{ url_for('show_works',page=works.next_num,title=title) }}{%endif%}">Next</a>
+    <a href="{% if title == '' %}{{ url_for('show_works',page=works.next_num) }}{% else %}{{ url_for('show_works',page=works.next_num,title=title) }}{%endif%}" class="button">Next</a>
     {% endif %}
     <ul>
     {% for work in works.items %}

@@ -7,7 +7,7 @@ Central location for nlp work
 def tokenize_work(corpus):
     sentences = nltk.sent_tokenize(corpus)
     sentences = [nltk.word_tokenize(sent) for sent in sentences]
-    return [nltk.pos_tag(sent) for sent in sentences]   
+    return [nltk.pos_tag(sent) for sent in sentences]
 
 def named_entities(sentences):
     chunked = [nltk.ne_chunk(sent) for sent in sentences]

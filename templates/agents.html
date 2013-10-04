@@ -4,10 +4,10 @@
   {% if agents %}
   <h4>{{ agents.items[0].name }} to {{ agents.items[-1].name }}</h4> 
     {% if agents.has_prev %}
-    <a href="{% if name == '' %}{{ url_for('show_agents',page=agents.prev_num) }}{% else %}{{ url_for('show_agents',page=agents.prev_num,name=name) }}{%endif%}">Previous</a>
+    <a href="{% if name == '' %}{{ url_for('show_agents',page=agents.prev_num) }}{% else %}{{ url_for('show_agents',page=agents.prev_num,name=name) }}{%endif%}" class="button">Previous</a>
     {% endif %}
     {% if agents.has_next %}
-    <a href="{% if name == '' %}{{ url_for('show_agents',page=agents.next_num) }}{% else %}{{ url_for('show_agents',page=agents.next_num,name=name) }}{%endif%}">Next</a>
+    <a href="{% if name == '' %}{{ url_for('show_agents',page=agents.next_num) }}{% else %}{{ url_for('show_agents',page=agents.next_num,name=name) }}{%endif%}" class="button">Next</a>
     {% endif %}
     <ul>
     {% for agent in agents.items %}
