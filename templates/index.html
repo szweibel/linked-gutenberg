@@ -7,7 +7,7 @@
         <input type=submit value='search'>
     </form>
 {%- endmacro %}
-<ul>
+<ul class='no-bullet'>
     <li>
     <a href="{{ url_for('show_agents') }}">See all agents ({{agent}} total)</a>
     {{ search_form('name','agent name','agents') }}

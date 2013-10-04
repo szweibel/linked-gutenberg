@@ -161,8 +161,19 @@ def show_corpus(title):
 @app.route('/nlpdata/<title>',methods=['POST','GET'])
 def show_nlpdata(title):
     work = Work.query.filter(Work.title == title).first_or_404()
-    freq_dist = nlp_gute.make_ne_freq_dist(nlp_gute.named_entities(nlp_gute.tokenize_work(work.corpus)))   
+    freq_dist = nlp_gute.make_ne_freq_dist(nlp_gute.named_entities(nlp_gute.tokenize_work(work.corpus)))
     return render_template('show_nlpdata.html',work=work,nes=freq_dist)
+
+
+@app.route('/nlptext/<title>',methods=['POST','GET'])
+def show_nlptext(title):
+    work = Work.query.filter(Work.title == title).first_or_404()
+    freq_dist = nlp_gute.make_ne_freq_dist(nlp_gute.named_entities(nlp_gute.tokenize_work(work.corpus)))
+    list_of_people = []
+    for n in  freq_dist['PERSON']:
+        list_of_people.append(n[0])
+    print list_of_people
+    return render_template('show_nlptext.html',work=work, entities = freq_dist)
 
 
 @app.route('/LCSH/<subject_heading>',methods=['GET','POST'])
